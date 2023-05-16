@@ -6,10 +6,15 @@ from rest_framework.exceptions import ValidationError
 from djangoapp.b4c.models import Organization
 
 
-class SignupSerializer(serializers.Serializer):
-    email = serializers.CharField()
-    username = serializers.CharField()
-    password = serializers.CharField()
+class SignupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("email", "username", "password")
+
+    def validate_email(self, data):
+        if User.objects.filter(email=data).exists():
+            raise ValidationError("A user with the specified email already exists")
+        return data
 
     def validate_username(self, data):
         if len(data) < 8:
